@@ -26,7 +26,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-
     public void addUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -49,9 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(User user) {
-        // 🔐 если пароль меняется — снова шифруем
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
         userRepository.save(user);
     }
 
@@ -61,7 +58,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Object findByEmail(String mail) {
-        return null;
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
     }
 }
