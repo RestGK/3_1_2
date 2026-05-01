@@ -26,14 +26,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+
     public void addUser(User user) {
-        // 🔐 шифруем пароль
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // 👤 по умолчанию даём роль USER
-        Role role = roleRepository.findByName("ROLE_USER");
-        user.setRoles(Set.of(role));
-
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            Role role = roleRepository.findByName("ROLE_USER");
+            user.setRoles(Set.of(role));
+        }
         userRepository.save(user);
     }
 
@@ -58,5 +58,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public Object findByEmail(String mail) {
+        return null;
     }
 }

@@ -10,4 +10,6 @@ public interface UserService {
     User getUser(long id);
     void updateUser(User user);
     void deleteUser(long id);
+
+    Object findByEmail(String mail);
 }

@@ -8,20 +8,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
-
-    public User() {}
-
-    public User(String firstName, String lastName, String email, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,28 +35,43 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String email;
 
-    // 🔐 добавили пароль
     private String password;
 
-    // 🔥 роли
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 
-    // --- UserDetails ---
+    // Конструкторы
+    public User() {
+    }
+
+    public User(String firstName, String lastName, String email, String password) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+    }
+
+    public User(String firstName, String lastName, String email, String password, Set<Role> roles) {
+        this(firstName, lastName, email, password);
+        this.roles = roles;
+    }
+
+    // --- UserDetails implementation ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        // Возвращаем неизменяемую копию, чтобы защитить внутреннее состояние
+        return Collections.unmodifiableSet(roles);
     }
 
     @Override
     public String getUsername() {
-        return email; // логин = email
+        return email;
     }
 
     @Override
@@ -70,32 +79,107 @@ public class User implements UserDetails {
         return password;
     }
 
-    @Override public boolean isAccountNonExpired() { return true; }
-    @Override public boolean isAccountNonLocked() { return true; }
-    @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
-    // --- getters/setters ---
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
-    public Long getId() { return id; }
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
-    public void setId(Long id) { this.id = id; }
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
-    public String getFirstName() { return firstName; }
+    // --- Вспомогательные методы для ролей ---
 
-    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void addRole(Role role) {
+        this.roles.add(role);
+    }
 
-    public String getLastName() { return lastName; }
+    public void removeRole(Role role) {
+        this.roles.remove(role);
+    }
 
-    public void setLastName(String lastName) { this.lastName = lastName; }
+    // --- Геттеры и сеттеры ---
 
-    public String getEmail() { return email; }
+    public Long getId() {
+        return id;
+    }
 
-    public void setEmail(String email) { this.email = email; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public void setPassword(String password) { this.password = password; }
+    public String getFirstName() {
+        return firstName;
+    }
 
-    public Set<Role> getRoles() { return roles; }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-    public void setRoles(Set<Role> roles) { this.roles = roles; }
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    // --- equals и hashCode только по id (рекомендация Hibernate) ---
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id != null && Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? Objects.hash(id) : 0;
+    }
+
+    // --- toString без пароля (безопасность) ---
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", roles=" + roles +
+                '}';
+    }
 }
