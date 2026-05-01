@@ -6,7 +6,6 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.service.UserService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Set;
 
@@ -15,14 +14,11 @@ public class DataInitializer {
 
     private final RoleRepository roleRepository;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(RoleRepository roleRepository,
-                           UserService userService,
-                           PasswordEncoder passwordEncoder) {
+                           UserService userService) {
         this.roleRepository = roleRepository;
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
@@ -40,17 +36,15 @@ public class DataInitializer {
             roleRepository.save(adminRole);
         }
 
-        // 2. Создаём демо-пользователей для теста (опционально)
-        if (userService.findByEmail("user@example.com") == null) {
-            User user = new User("User", "Userov", "user@example.com",
-                    passwordEncoder.encode("user"));
+
+        if (userService.findByEmail("Smirnov@mail.ru") == null) {
+            User user = new User("Smirnov", "Viktor", "Smirnov@mail.ru", "user");
             user.setRoles(Set.of(userRole));
             userService.addUser(user);
         }
 
-        if (userService.findByEmail("admin@example.com") == null) {
-            User admin = new User("Admin", "Adminov", "admin@example.com",
-                    passwordEncoder.encode("admin"));
+        if (userService.findByEmail("Kulaksazyan@list.ru") == null) {
+            User admin = new User("George", "Kulaksazyan", "Kulaksazyan@list.ru", "admin");
             admin.setRoles(Set.of(adminRole, userRole)); // админ с двумя ролями
             userService.addUser(admin);
         }
