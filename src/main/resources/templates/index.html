@@ -139,7 +139,7 @@
                                                 Delete
                                             </button>
 
-                                            <!-- Модальное окно удаления  -->
+                                            <!-- Модальное окно удаления – полная информация -->
                                             <div class="modal fade" th:id="'deleteModal' + ${user.id}" tabindex="-1" aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
@@ -199,7 +199,7 @@
                     </div>
                 </div>
 
-                <!-- Вкладка New User -->
+                <!-- Вкладка New User-->
                 <div class="tab-pane fade" id="new-user-pane" role="tabpanel" aria-labelledby="new-user-tab">
                     <div class="card rounded-0 border-top-0">
                         <div class="card-header bg-white">
@@ -208,14 +208,16 @@
                         <div class="card-body">
                             <div class="row justify-content-center">
                                 <div class="col-12 col-md-7 col-lg-4">
-                                    <form th:action="@{/admin/adduser}" method="post" class="text-center">
+                                    <form id="addUserForm" th:action="@{/admin/adduser}" method="post" class="text-center">
                                         <div class="mb-3">
                                             <label for="firstName" class="form-label fw-bold mb-1">First name</label>
                                             <input id="firstName" type="text" name="firstName" class="form-control" required>
+                                            <div class="invalid-feedback" id="firstNameError" style="display: none;">Недопустимый символ</div>
                                         </div>
                                         <div class="mb-3">
                                             <label for="lastName" class="form-label fw-bold mb-1">Last name</label>
                                             <input id="lastName" type="text" name="lastName" class="form-control" required>
+                                            <div class="invalid-feedback" id="lastNameError" style="display: none;">Недопустимый символ</div>
                                         </div>
                                         <div class="mb-3">
                                             <label for="age" class="form-label fw-bold mb-1">Age</label>
@@ -228,6 +230,7 @@
                                         <div class="mb-3">
                                             <label for="password" class="form-label fw-bold mb-1">Password</label>
                                             <input id="password" type="password" name="password" class="form-control" required>
+                                            <div class="invalid-feedback" id="passwordError" style="display: none;">Недопустимый символ</div>
                                         </div>
                                         <div class="mb-3">
                                             <label for="roles" class="form-label fw-bold mb-1">Role</label>
@@ -237,7 +240,7 @@
                                                         th:text="${role.displayName}"></option>
                                             </select>
                                         </div>
-                                        <button type="submit" class="btn btn-success px-4">Add new user</button>
+                                        <button type="submit" id="addUserBtn" class="btn btn-success px-4 disabled" disabled>Add new user</button>
                                     </form>
                                 </div>
                             </div>
@@ -249,5 +252,86 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function() {
+        const firstNameInput = document.getElementById('firstName');
+        const lastNameInput = document.getElementById('lastName');
+        const passwordInput = document.getElementById('password');
+        const addBtn = document.getElementById('addUserBtn');
+        const firstNameError = document.getElementById('firstNameError');
+        const lastNameError = document.getElementById('lastNameError');
+        const passwordError = document.getElementById('passwordError');
+
+        // Только латиница и дефис для имени/фамилии
+        const namePattern = /^[A-Za-z\-]+$/;
+        // Только английские буквы для пароля
+        const passwordPattern = /^[A-Za-z]+$/;
+
+        function validateField(input, errorDiv, pattern) {
+            const value = input.value.trim();
+            if (value.length === 0) {
+                errorDiv.style.display = 'none';
+                input.classList.remove('is-invalid');
+                return false;
+            }
+            if (!pattern.test(value)) {
+                errorDiv.style.display = 'block';
+                input.classList.add('is-invalid');
+                return false;
+            } else {
+                errorDiv.style.display = 'none';
+                input.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        function updateButtonState() {
+            const isFirstNameValid = validateField(firstNameInput, firstNameError, namePattern);
+            const isLastNameValid = validateField(lastNameInput, lastNameError, namePattern);
+            const isPasswordValid = validateField(passwordInput, passwordError, passwordPattern)
+                && passwordInput.value.trim().length > 0;
+
+            const isFormValid = isFirstNameValid && isLastNameValid && isPasswordValid
+                && firstNameInput.value.trim().length > 0
+                && lastNameInput.value.trim().length > 0;
+
+            if (isFormValid) {
+                addBtn.classList.remove('disabled', 'btn-secondary');
+                addBtn.classList.add('btn-success');
+                addBtn.disabled = false;
+            } else {
+                addBtn.classList.add('disabled', 'btn-secondary');
+                addBtn.classList.remove('btn-success');
+                addBtn.disabled = true;
+            }
+        }
+
+        [firstNameInput, lastNameInput, passwordInput].forEach(function(input) {
+            input.addEventListener('input', updateButtonState);
+        });
+
+        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+            updateButtonState();
+            if (addBtn.disabled) {
+                e.preventDefault();
+                if (!namePattern.test(firstNameInput.value.trim())) {
+                    firstNameError.style.display = 'block';
+                    firstNameInput.classList.add('is-invalid');
+                }
+                if (!namePattern.test(lastNameInput.value.trim())) {
+                    lastNameError.style.display = 'block';
+                    lastNameInput.classList.add('is-invalid');
+                }
+                if (!passwordPattern.test(passwordInput.value.trim())) {
+                    passwordError.style.display = 'block';
+                    passwordInput.classList.add('is-invalid');
+                }
+            }
+        });
+
+        // Начальное состояние – кнопка неактивна
+        updateButtonState();
+    })();
+</script>
 </body>
 </html>
