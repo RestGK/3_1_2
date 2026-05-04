@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
@@ -26,6 +27,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void addUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -37,27 +39,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUser(long id) {
         return userRepository.findById(id).orElse(null);
     }
 
     @Override
+    @Transactional
     public void updateUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
     @Override
+    @Transactional
     public void deleteUser(long id) {
         userRepository.deleteById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
     }

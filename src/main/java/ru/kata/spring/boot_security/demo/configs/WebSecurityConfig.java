@@ -24,7 +24,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**").permitAll() // <-- вот эта строка
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/", "/login").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user").hasAnyRole("USER", "ADMIN")

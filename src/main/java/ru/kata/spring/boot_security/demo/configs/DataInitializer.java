@@ -23,7 +23,7 @@ public class DataInitializer {
 
     @PostConstruct
     public void init() {
-        // 1. Создаём роли, если их нет
+
         Role userRole = roleRepository.findByName("ROLE_USER");
         if (userRole == null) {
             userRole = new Role("ROLE_USER");
@@ -39,13 +39,16 @@ public class DataInitializer {
 
         if (userService.findByEmail("Smirnov@mail.ru") == null) {
             User user = new User("Smirnov", "Viktor", "Smirnov@mail.ru", "user");
+            user.setAge(25);
             user.setRoles(Set.of(userRole));
             userService.addUser(user);
         }
 
         if (userService.findByEmail("Kulaksazyan@list.ru") == null) {
             User admin = new User("George", "Kulaksazyan", "Kulaksazyan@list.ru", "admin");
-            admin.setRoles(Set.of(adminRole, userRole)); // админ с двумя ролями
+            admin.setAge(30);
+
+            admin.setRoles(Set.of(adminRole, userRole));
             userService.addUser(admin);
         }
     }

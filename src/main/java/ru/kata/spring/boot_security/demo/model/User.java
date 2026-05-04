@@ -1,9 +1,7 @@
 package ru.kata.spring.boot_security.demo.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -37,13 +35,26 @@ public class User implements UserDetails {
 
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @Min(value = 0, message = "Age must be >= 0")
+    @Max(value = 150, message = "Age must be <= 150")
+    private Integer age;
+
+    // Геттер и сеттер
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles;
 
     // Конструкторы
     public User() {
@@ -61,11 +72,11 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    // --- UserDetails implementation ---
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Возвращаем неизменяемую копию, чтобы защитить внутреннее состояние
+
         return Collections.unmodifiableSet(roles);
     }
 
@@ -99,7 +110,7 @@ public class User implements UserDetails {
         return true;
     }
 
-    // --- Вспомогательные методы для ролей ---
+
 
     public void addRole(Role role) {
         this.roles.add(role);
@@ -109,7 +120,7 @@ public class User implements UserDetails {
         this.roles.remove(role);
     }
 
-    // --- Геттеры и сеттеры ---
+    //  Геттеры и сеттеры
 
     public Long getId() {
         return id;
@@ -155,7 +166,9 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    // --- equals и hashCode только по id (рекомендация Hibernate) ---
+    public String getRoleDisplay() {
+        return roles.stream().anyMatch(r -> "ROLE_ADMIN".equals(r.getName())) ? "Admin" : "User";
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -170,7 +183,7 @@ public class User implements UserDetails {
         return id != null ? Objects.hash(id) : 0;
     }
 
-    // --- toString без пароля (безопасность) ---
+
 
     @Override
     public String toString() {
@@ -182,4 +195,5 @@ public class User implements UserDetails {
                 ", roles=" + roles +
                 '}';
     }
+
 }
