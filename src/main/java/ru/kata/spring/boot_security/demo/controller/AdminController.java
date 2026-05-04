@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.service.RoleServiceImpl;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.util.List;
@@ -18,9 +18,9 @@ import java.util.Set;
 public class AdminController {
 
     private final UserService userService;
-    private final RoleService roleService;
+    private final RoleServiceImpl roleService;
 
-    public AdminController(UserService userService, RoleService roleService) {
+    public AdminController(UserService userService, RoleServiceImpl roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
