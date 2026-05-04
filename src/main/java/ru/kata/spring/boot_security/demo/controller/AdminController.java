@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.service.RoleServiceImpl;
+import ru.kata.spring.boot_security.demo.service.RoleService;   // ← интерфейс
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.util.List;
@@ -18,26 +18,22 @@ import java.util.Set;
 public class AdminController {
 
     private final UserService userService;
-    private final RoleServiceImpl roleService;
+    private final RoleService roleService;   // ← интерфейс
 
-    public AdminController(UserService userService, RoleServiceImpl roleService) {
+    public AdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
 
-
     @GetMapping
     public String adminPage(Model model) {
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = userService.findByEmail(auth.getName());
         model.addAttribute("currentUser", currentUser);
-
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("allRoles", roleService.getAllRoles());
         return "index";
     }
-
 
     @PostMapping("/adduser")
     public String addUser(@ModelAttribute User user,
@@ -53,7 +49,6 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-
     @PostMapping("/updateuser")
     public String updateUser(@ModelAttribute User user,
                              @RequestParam(value = "roles", required = false) List<Long> roleIds) {
@@ -65,7 +60,6 @@ public class AdminController {
         userService.updateUser(user);
         return "redirect:/admin";
     }
-
 
     @PostMapping("/delete")
     public String deleteUser(@RequestParam("id") Long id) {
